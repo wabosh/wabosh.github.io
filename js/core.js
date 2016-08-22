@@ -1,15 +1,11 @@
 var commands = Array();
 
 $(document).ready(function() {
-    $(".erasable").remove();
+    $("#inputfield").focus();
     commands.push("help");
     commands.push("clear");
     commands.push("install");
     printLine("type 'help' for further commands.");
-});
-
-$(document).click(function() {
-    $("#inputfield").focus();
 });
 
 $(document).keypress(function(e) {
