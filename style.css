@@ -23,6 +23,13 @@ p {
     }
 }
 
+#inputfield {
+    position: fixed;
+    top: 0;
+    left: 0;
+    opacity: 0;
+}
+
 .currentInput p:before {
     content: "> ";
 }

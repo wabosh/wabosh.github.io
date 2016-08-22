@@ -21,6 +21,7 @@ $(document).keypress(function(e) {
     } else {
         $(".currentInput p").append(String.fromCharCode(e.which));
     }
+    return false;
 });
 
 function printLine(msg) {
