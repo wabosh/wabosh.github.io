@@ -16,8 +16,8 @@ p {
 }
 
 @media
-(-webkit-min-device-pixel-ratio: 2),
-(min-resolution: 192dpi) {
+(-webkit-min-device-pixel-ratio: 1.5),
+(min-resolution: 150dpi) {
     p {
         font-size: 3em;
     }
