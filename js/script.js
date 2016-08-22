@@ -1,8 +1,10 @@
 var commands = Array();
 
 $(document).ready(function() {
+    $(".erasable").remove();
     commands.push("help");
     commands.push("clear");
+    commands.push("install");
 });
 
 $(document).keypress(function(e) {

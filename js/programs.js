@@ -35,3 +35,11 @@ function help() {
     }
     printLine("-------------------");
 }
+
+/**
+ * Installs a command by the given package-name
+ * @param packageName
+ */
+function install(packageName) {
+
+}
