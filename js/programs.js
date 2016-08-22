@@ -1,17 +1,12 @@
+var packages = {
+    "ls.hisnbarg.com" : "ls"
+};
+
 /**
- * Echo : Prints the included params
- * @param msg The message to test with
+ * Restarts the game by refreshing the page.
  */
-function echo(msg) {
-    if( Object.prototype.toString.call( msg ) === '[object Array]' ) {
-        var output = "echo: ";
-        for(var i = 0; i < msg.length; i++) {
-            output+=msg[i]+" ";
-        }
-        printLine(output);
-    } else {
-        printLine("echo: " + msg);
-    }
+function restart() {
+    location.reload();
 }
 
 /**
@@ -37,9 +32,33 @@ function help() {
 }
 
 /**
+ * Prints the current task.
+ */
+function ptask() {
+    printLevelTask();
+}
+
+/**
  * Installs a command by the given package-name
  * @param packageName
  */
 function install(packageName) {
-    
+    if(packageName in packages) {
+        commands.push(packages[packageName]);
+        toggleBusy();
+        setTimeout(function() {
+            printLine("Package "+packageName+" successfully installed!");
+            toggleBusy();
+        }, 2000);
+
+    } else {
+        printLine("Package not found!");
+    }
+}
+
+function ls() {
+    var files = getFiles(path);
+    for(i = 0; i < files.length; i++) {
+        printLine(files[i]);
+    }
 }
