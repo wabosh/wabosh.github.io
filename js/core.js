@@ -17,7 +17,7 @@ $(document).ready(function() {
     printLine("type 'help' for further commands.");
 });
 
-$(document).keydown(function(e) {
+$(document).keypress(function(e) {
     if(!busy) {
         console.log(e.which);
         if (e.which == 8) {
