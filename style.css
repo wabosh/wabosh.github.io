@@ -15,6 +15,14 @@ p {
     white-space: pre;
 }
 
+@media
+(-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    p {
+        font-size: 3em;
+    }
+}
+
 .currentInput p:before {
     content: "> ";
 }
