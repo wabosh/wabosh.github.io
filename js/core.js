@@ -8,6 +8,10 @@ $(document).ready(function() {
     printLine("type 'help' for further commands.");
 });
 
+$(document).click(function() {
+    $("#inputfield").focus();
+});
+
 $(document).keypress(function(e) {
     console.log(e.which);
     if(e.which == 8) {
