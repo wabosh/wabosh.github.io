@@ -2,6 +2,7 @@ var commands = Array();
 
 $(document).ready(function() {
     commands.push("help");
+    commands.push("clear");
 });
 
 $(document).keypress(function(e) {
@@ -42,20 +43,24 @@ function executeTask(fullText) {
         var strings = fullText.split(/[ ]+/);
         var fnstring = strings[0];
 
-        
+        var commandFound = $.inArray(fnstring, commands) > -1;
 
-        var fnargs = Array();
+        if(commandFound) {
+            var fnargs = Array();
 
-        // include args
-        for (var i = 1; i < strings.length; i++) {
-            fnargs[i - 1] = strings[i];
-        }
+            // include args
+            for (var i = 1; i < strings.length; i++) {
+                fnargs[i - 1] = strings[i];
+            }
 
-        // find function-object
-        var fn = window[fnstring];
+            // find function-object
+            var fn = window[fnstring];
 
-        if (typeof fn === "function") {
-            fn.apply(null, fnargs);
+            if (typeof fn === "function") {
+                fn.apply(null, fnargs);
+            } else {
+                printLine("\"" + fnstring + "\" not issued: command not found!");
+            }
         } else {
             printLine("\"" + fnstring + "\" not issued: command not found!");
         }

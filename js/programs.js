@@ -28,10 +28,10 @@ function clear() {
  * prints help for common commands
  */
 function help() {
-    printLine("Help");
-    printLine("----------------------------------------");
-    printLine(" - clear  : clears all content on Screen");
-    printLine(" - echo   : echos the first parameter");
-
-    printLine("");
+    printLine("Available commands:");
+    printLine("-------------------");
+    for(var i = 0; i < commands.length; i++) {
+        printLine("| "+commands[i]);
+    }
+    printLine("-------------------");
 }
