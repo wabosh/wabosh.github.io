@@ -5,6 +5,7 @@ $(document).ready(function() {
     commands.push("help");
     commands.push("clear");
     commands.push("install");
+    printLine("type 'help' for further commands.");
 });
 
 $(document).keypress(function(e) {
