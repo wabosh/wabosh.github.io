@@ -1,5 +1,5 @@
 var packages = {
-    "ls.hisnbarg.com" : "ls"
+    "ls.asd.org" : "ls"
 };
 
 /**
@@ -35,7 +35,14 @@ function help() {
  * Prints the current task.
  */
 function ptask() {
-    printLevelTask();
+    switch(level) {
+        case 1:
+            printLine("-> 1. Task: Gain Access to the filesystem (note: It isn't a real filesystem)");
+            break;
+        default:
+            printLine("-> -1. No current task.");
+            break;
+    }
 }
 
 /**
@@ -56,9 +63,21 @@ function install(packageName) {
     }
 }
 
+/**
+ * Shows the content of the current directory in the fs
+ */
 function ls() {
     var files = getFiles(path);
     for(i = 0; i < files.length; i++) {
         printLine(files[i]);
+    }
+}
+
+/**
+ * Prints the content of the commandstack
+ */
+function cms() {
+    for(i = 0; i < commandStack.length; i++) {
+        printLine(commandStack[i]);
     }
 }

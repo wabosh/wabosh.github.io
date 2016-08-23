@@ -3,7 +3,7 @@ var level = 1;
 var busy = false;
 var path = "files";
 var commandStack = new Array();
-var commandStackIndicator = commandStack.length + 1;
+var commandStackIndicator = commandStack.length;
 
 $(document).ready(function() {
     $("#inputfield").focus();
@@ -13,11 +13,13 @@ $(document).ready(function() {
     commands.push("install");
     commands.push("ptask");
     commands.push("restart");
-    printLevelTask();
+    commands.push("cms");
+    ptask();
     printLine("type 'help' for further commands.");
+    printLine("----------------------------------------------------------------------------------");
 });
 
-$(document).keypress(function(e) {
+$(document).keydown(function(e) {
     if(!busy) {
         console.log(e.which);
         if (e.which == 8) {
@@ -28,12 +30,34 @@ $(document).keypress(function(e) {
         else if (e.which == 13) {
             var text = $(".currentInput p").text();
             executeTask(text, null, null);
-        } else {
-            $(".currentInput p").append(String.fromCharCode(e.which));
+        } else if((e.which >= 32 && e.which <= 126 && e.which != 38 && e.which != 40) || (e.which >= 127 && e.which <= 563)) {
+            $(".currentInput p").append(e.key);
+        } else if(e.which == 38 || e.which == 40) {
+            controlCommandStack(e.which);
+        } else if(e.which == 9) {
+            var text = $(".currentInput p").text();
+            completeCommand(text);
         }
     }
     return false;
 });
+
+/**
+ * completes the current typed command-snippet
+ */
+function completeCommand(text) {
+    var foundi = 0;
+    var cmdFound = "";
+    for(i = 0; i < commands.length; i++) {
+        if(commands[i].match("^"+text)) {
+            cmdFound = commands[i];
+            foundi++;
+        }
+    }
+    if(foundi==1) {
+        $(".currentInput p").text(cmdFound);
+    }
+}
 
 /**
  * Prints the given String on the command-line
@@ -41,20 +65,6 @@ $(document).keypress(function(e) {
  */
 function printLine(msg) {
     $('.inputs').find(' > li:last-child').before('<li><p>&gt;&gt; ' + msg + '</p></li>');
-}
-
-/**
- * Prints the current Task
- */
-function printLevelTask() {
-    switch(level) {
-        case 1:
-            printLine("-> 1. Task: Gain Access to the filesystem (disclaimer: It isn't a real filesystem)");
-            break;
-        default:
-            printLine("-> -1. No current task.");
-            break;
-    }
 }
 
 /**
@@ -66,15 +76,14 @@ function printLevelTask() {
 function executeTask(fullText) {
     $('.inputs').find(' > li:last-child').before('<li><p>&gt; ' + fullText + '</p></li>');
     $(".currentInput p").text("");
-    $(".terminal").css({
-        "height": $(document).height()
-    });
-    $(document).scrollTop($(document).height());
 
     // Task executing part
     if(fullText) {
+        commandStack.push(fullText);
+        commandStackIndicator = commandStack.length;
         var strings = fullText.split(/[ ]+/);
         var fnstring = strings[0];
+        fnstring = fnstring.toLowerCase();
 
         var commandFound = $.inArray(fnstring, commands) > -1;
 
@@ -98,6 +107,34 @@ function executeTask(fullText) {
             printLine("\"" + fnstring + "\" not issued: command not found!");
         }
     }
+    $(".terminal").css({
+        "height": $(document).height()
+    });
+    $(document).scrollTop($(document).height());
+}
+
+/**
+ * Controls the command stack by arrow up and down
+ * @param e
+ */
+function controlCommandStack(e) {
+    if(e==40) {
+        if(commandStackIndicator < commandStack.length-1) {
+            commandStackIndicator += 1;
+            $(".currentInput p").text(commandStack[commandStackIndicator]);
+            return;
+        }
+    } else {
+        if(commandStackIndicator > 0) {
+            commandStackIndicator -= 1;
+            $(".currentInput p").text(commandStack[commandStackIndicator]);
+            return;
+        } else if(commandStackIndicator == 0) {
+            $(".currentInput p").text(commandStack[commandStackIndicator]);
+            return;
+        }
+    }
+    $(".currentInput p").text("");
 }
 
 /**
@@ -113,15 +150,17 @@ function toggleBusy() {
  * @returns {Array}
  */
 function getFiles(dir){
-    fileList = [];
-
-    var files = fs.readdirSync(dir);
-    for(var i in files){
-        if (!files.hasOwnProperty(i)) continue;
-        var name = dir+'/'+files[i];
-        if (!fs.statSync(name).isDirectory()){
-            fileList.push(name);
+    var fileList = new Array();
+    $.ajax({
+        //This will retrieve the contents of the folder if the folder is configured as 'browsable'
+        url: '../../'+dir,
+        success: function (data) {
+            //List all png or jpg or gif file names in the page
+            $(data).find().each(function () {
+                var filename = this.href.replace(window.location.host, "").replace("http:///", "");
+                fileList.push(filename);
+            });
         }
-    }
+    });
     return fileList;
 }
