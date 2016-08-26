@@ -1,87 +1,98 @@
-var commands = Array();
-var level = 1;
-var busy = false;
-var path = "files";
-var commandStack = new Array();
-var commandStackIndicator = commandStack.length;
+var currentProcess;
+var message;
+var commands = new Array();
 
+/**
+ * On startup.
+ */
 $(document).ready(function() {
-    $("#inputfield").focus();
-    unloadAllJS();
-    commands.push("help");
-    commands.push("clear");
-    commands.push("install");
-    commands.push("ptask");
-    commands.push("restart");
-    commands.push("cms");
-    ptask();
-    printLine("type 'help' for further commands.");
-    printLine("----------------------------------------------------------------------------------");
-});
-
-$(document).keydown(function(e) {
-    if(!busy) {
-        console.log(e.which);
-        if (e.which == 8) {
-            var text = $(".currentInput p").text();
-            text = text.slice(0, -1);
-            $(".currentInput p").text(text);
-        }
-        else if (e.which == 13) {
-            var text = $(".currentInput p").text();
-            executeTask(text, null, null);
-        } else if((e.which >= 32 && e.which <= 126 && e.which != 38 && e.which != 40) || (e.which >= 127 && e.which <= 563)) {
-            $(".currentInput p").append(e.key);
-        } else if(e.which == 38 || e.which == 40) {
-            controlCommandStack(e.which);
-        } else if(e.which == 9) {
-            var text = $(".currentInput p").text();
-            completeCommand(text);
-        }
-    }
-    return false;
+    $(".main").css({
+        "margin-top": $(".path").height() + "px"
+    });
+    // Add usable commands
+    setUpCommands();
+    // Sets username.
+    waitInput("Login: ", function (e) {
+        $(".user").text(e);
+    });
 });
 
 /**
- * completes the current typed command-snippet
+ * Sets a new Input-awaiting process.
+ * @param message
+ * @param process
  */
-function completeCommand(text) {
-    var foundi = 0;
-    var cmdFound = "";
-    for(i = 0; i < commands.length; i++) {
-        if(commands[i].match("^"+text)) {
-            cmdFound = commands[i];
-            foundi++;
-        }
-    }
-    if(foundi==1) {
-        $(".currentInput p").text(cmdFound);
-    }
+function waitInput(message, process) {
+    currentProcess = process;
+    this.message = message;
+    println("");
 }
 
 /**
- * Prints the given String on the command-line
+ * Prints a line with a given message in front.
  * @param msg
  */
-function printLine(msg) {
-    $('.inputs').find(' > li:last-child').before('<li><p>&gt;&gt; ' + msg + '</p></li>');
+function println(msg) {
+    $(".current-line").text(message+msg);
 }
 
 /**
- * Prints the issued command in a new <li> and inserts it before the currentInput, then it clears the currentInput.
- * @param fullText
- * @param command
- * @param args
+ * Copys the current line to an old one.
  */
-function executeTask(fullText) {
-    $('.inputs').find(' > li:last-child').before('<li><p>&gt; ' + fullText + '</p></li>');
-    $(".currentInput p").text("");
+function alterInput() {
+    if($(".current-line").text()) {
+        $(".current-line").before("<li>"+$(".current-line").text()+"</li>");
+    }
+}
 
+function printOut(msg) {
+    $(".current-line").before("<li>"+msg+"</li>");
+}
+
+/**
+ * Registers key events and gives them to the active process.
+ * @type {string}
+ */
+var input = "";
+$(document).keydown(function(e) {
+    if(e.which == 13) {
+        if(currentProcess!=null) {
+            currentProcess(input);
+            input = "";
+            currentProcess = null;
+            message = "";
+            if(currentProcess == null) {
+                commandLine();
+            }
+        }
+    } else {
+        if(e.which >= 32 && e.which <= 111) {
+            input+=e.key;
+        } else if(e.which == 8) {
+            input = input.slice(0, input.length-1);
+        }
+    }
+    println(input);
+});
+
+/**
+ * Runs the given command.
+ */
+function commandLine() {
+    waitInput(">_ ", function(e) {
+        executeTask(e);
+    });
+}
+
+/**
+ * Executes the command or gives an error if it wasn't found.
+ * @param fullText
+ */
+function executeTask(e) {
     // Task executing part
-    if(fullText) {
-        commandStack.push(fullText);
-        commandStackIndicator = commandStack.length;
-        var strings = fullText.split(/[ ]+/);
+    if(e) {
+        alterInput();
+        var strings = e.split(/[ ]+/);
         var fnstring = strings[0];
         fnstring = fnstring.toLowerCase();
 
@@ -101,66 +112,14 @@ function executeTask(fullText) {
             if (typeof fn === "function") {
                 fn.apply(null, fnargs);
             } else {
-                printLine("\"" + fnstring + "\" not issued: command not found!");
+                println("\"" + fnstring + "\" not issued: command not found!");
             }
         } else {
-            printLine("\"" + fnstring + "\" not issued: command not found!");
+            println("\"" + fnstring + "\" not issued: command not found!");
         }
     }
     $(".terminal").css({
         "height": $(document).height()
     });
     $(document).scrollTop($(document).height());
-}
-
-/**
- * Controls the command stack by arrow up and down
- * @param e
- */
-function controlCommandStack(e) {
-    if(e==40) {
-        if(commandStackIndicator < commandStack.length-1) {
-            commandStackIndicator += 1;
-            $(".currentInput p").text(commandStack[commandStackIndicator]);
-            return;
-        }
-    } else {
-        if(commandStackIndicator > 0) {
-            commandStackIndicator -= 1;
-            $(".currentInput p").text(commandStack[commandStackIndicator]);
-            return;
-        } else if(commandStackIndicator == 0) {
-            $(".currentInput p").text(commandStack[commandStackIndicator]);
-            return;
-        }
-    }
-    $(".currentInput p").text("");
-}
-
-/**
- * Toggles the busy-boolean. (It determines whether or not input is accepted)
- */
-function toggleBusy() {
-    busy = !busy;
-}
-
-/**
- * Reads all filenames in the given directory.
- * @param dir
- * @returns {Array}
- */
-function getFiles(dir){
-    var fileList = new Array();
-    $.ajax({
-        //This will retrieve the contents of the folder if the folder is configured as 'browsable'
-        url: '../../'+dir,
-        success: function (data) {
-            //List all png or jpg or gif file names in the page
-            $(data).find().each(function () {
-                var filename = this.href.replace(window.location.host, "").replace("http:///", "");
-                fileList.push(filename);
-            });
-        }
-    });
-    return fileList;
 }

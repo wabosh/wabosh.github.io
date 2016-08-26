@@ -4,38 +4,60 @@
 }
 
 html, body {
-    height: 100%;
+    height: calc(100% - 25px);
 }
 
-p {
-    color: #e7e7e7;
+body {
+    background-color: black;
+    color: white;
+    font-size: 25px;
     font-family: monospace;
-    font-size: 1.7em;
-    padding-left: 50px;
+}
+
+span {
     white-space: pre;
 }
 
-@media
-(-webkit-min-device-pixel-ratio: 1.5),
-(min-resolution: 150dpi) {
-    p {
-        font-size: 3em;
-    }
-}
+/**
+ *  Fixed-Path-Bar
+ */
 
-#inputfield {
+.path {
+    background-color: white;
+    max-width: 100%;
+    width: 100%;
     position: fixed;
     top: 0;
-    left: 0;
-    opacity: 0;
 }
 
-.currentInput p:before {
-    content: "> ";
+.user {
+    background-color: #00d3ff;
+    color: black;
 }
 
-.currentInput p:after {
-    content: "_";
+.user:after {
+    content: "@"
+}
+
+/**
+ *  Main-Window
+ */
+
+.main {
+    height: auto;
+}
+
+.main ul {
+    list-style-type: none;
+}
+
+.current-line {
+    background-color: #202020;
+    width: 100%;
+}
+
+.current-line:after {
+    content: "█";
     animation: blink-animation 1s steps(2, start) infinite;
     -webkit-animation: blink-animation 1s steps(2, start) infinite;
 }
@@ -45,20 +67,8 @@ p {
         visibility: hidden;
     }
 }
-
 @-webkit-keyframes blink-animation {
     to {
         visibility: hidden;
     }
-}
-
-.terminal {
-    width: 100%;
-    height: 100%;
-    background-color: black;
-}
-
-.currentInput {
-    width: 100%;
-    background-color: #252525;
 }
